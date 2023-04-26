@@ -129,6 +129,8 @@ class HumanGenerator():
             self.writeHuman(list(zip([choice for choice in self.choices], combination)), humanNumber, path)
             humanNumber += 1
 
+        print("Finish creation")
+
     def writeHuman(self, human, humanNumber, path):
         fileName = "human " + str(humanNumber) + ".mhm"
 

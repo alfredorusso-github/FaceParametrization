@@ -1,4 +1,6 @@
-from HumanGenerator import getFilePath
+# from HumanGenerator import getFilePath
+import os
+from pathlib import Path
 
 # This utils is used in order to compute an estimated size for each face macroarea related to the parameters. 
 # The size is realted to 11 values that each parameter can assume and assuming that each file has a weight of 1KB
@@ -8,6 +10,16 @@ PARAMS = {}
 SUFFIXES = ['KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
 
 numberOfValues = 5
+
+def getFilePath(fn):
+    upperPath = Path().absolute()
+    currentPath = os.path.dirname(os.path.realpath(__file__))
+
+    for filename in os.listdir(currentPath):
+        if(filename == fn): return currentPath + "/" + fn
+    
+    for filename in os.listdir(upperPath):
+        if(filename == fn) : return upperPath + "/" + fn
 
 def getParams():
     paramsPath = getFilePath("FaceParams.txt")
