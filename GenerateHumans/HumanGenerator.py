@@ -1,36 +1,22 @@
 import os
 import itertools
 import re
-import sizeComputation
-from pathlib import Path
 
-def getFilePath(fn):
-    upperPath = Path().absolute()
-    currentPath = os.path.dirname(os.path.realpath(__file__))
 
-    for filename in os.listdir(currentPath):
-        if(filename == fn): return currentPath + "/" + fn
-    
-    for filename in os.listdir(upperPath):
-        if(filename == fn) : return upperPath + "/" + fn
-
-def createFolder(path):
-
+def create_folder(path):
     numbers = [int(name) for name in os.listdir(path) if re.search(r"^\d+\.?\d*$", name)]
-    
-    folderPath = path + "/" + str(max(numbers) + 1) if len(numbers) > 0 else path + "/1"
 
-    if not os.path.exists(folderPath):
+    folder_path = path + "/" + str(max(numbers) + 1) if len(numbers) > 0 else path + "/1"
+
+    if not os.path.exists(folder_path):
         print("Creating folder ...")
-        os.mkdir(folderPath)
+        os.mkdir(folder_path)
 
-    return folderPath
+    return folder_path
 
-class HumanGenerator():
-    paramsFileName = "FaceParams.txt"
+
+class HumanGenerator:
     paramsDict = {}
-    choices = []
-    step = 25
 
     VERSION = "version v1.2.0"
     CAMERA = "camera 0.0 0.0 0.0 0.0 0.0 1.225"
@@ -51,106 +37,53 @@ class HumanGenerator():
 
     PATH = os.path.expanduser("~") + "/Documenti/makehuman/v1py3/models"
 
-    def __init__(self, d = {}) -> None:
-       self.paramsDict = d
+    def __init__(self, file_pth) -> None:
 
-       if(len(self.paramsDict) == 0):
-           self.createDict()
-    
-    def __len__(self):
-        return len(self.paramsDict)
+        self.__create_dict(file_pth)
 
-    def __str__(self) -> str:
-        return str(self.paramsDict)
-    
-    def start(self):
-        self.selectParameters()
-    
-    def createDict(self):
-        filePth = getFilePath(self.paramsFileName)
+    def __create_dict(self, file_pth):
 
-        f = open(filePth)
+        f = open(file_pth)
 
         params = [param.split("\n")[0] for param in f.readlines()]
 
         for modifier in params:
-            splittedLine = modifier.split("/")
-            self.paramsDict.setdefault(splittedLine[0], []).append(splittedLine[1])
-    
-    def selectParameters(self):
-        print("CHOOSE PARAMTERS FOR CREATING HUMAN")
-        
-        all = input("Do you wanto to choice all parameters? (Y/n): ")
-        
-        if(all.lower == "y" or all == ""):
-            for key, values in self.paramsDict.items():
-                for value in values:
-                    self.choices.append(key + "/" + value)
-        else:
-            choiceSingleParameter = input("Do you want to choice single parameter? (Y/n): ")
+            split_line = modifier.split("/")
+            self.paramsDict.setdefault(split_line[0], []).append(split_line[1])
 
-            for key, values in self.paramsDict.items():
-                choice = input("Do you want include parameters for {0}? (Y/n): ".format(key)) 
-                if(choice.lower() == "y" or choice == ""):
-                    for value in values:
-                        if(choiceSingleParameter.lower() == "y" or choiceSingleParameter == ""):
-                            choice = input("Do you want include parameters for {0} (Y/n): ".format(value))
-                            if(choice.lower == "y" or choice == ""): self.choices.append(key + "/" + value)
-                        else:
-                            self.choices.append(key + "/" + value)
-
-        # (max_range - min_range) / (num_elements - 1)
-        self.step = ( (1.0 - (-1.0)) / (sizeComputation.computeSize(self.choices) - 1) ) * 100
-
-        choice = input("Do you want to ocntinue? (Y/n): ")
-        self.createHuman() if choice.lower() == "y" or choice == "" else None        
-    
-    def debugChoice(self):
-        self.choices = [key + "/" + value for key, values in self.paramsDict.items() for value in values if key == "eyebrows"]
-
-        self.step = (1.0 - (-1.0)) / (sizeComputation.computeSize(self.choices) - 1) * 100
-        print(self.step)
-
-        choice = input("Do you want to ocntinue? (Y/n): ")
-        self.createHuman() if choice.lower() == "y" or choice == "" else None
-
-    def createHuman(self):
+    def create_human(self, choices, step):
 
         # create range of values for parameters
-        values = [[i/100 for i in range(-100, 101, int(self.step))] for _ in range(len(self.choices))]
+        values = [[i / 100 for i in range(-100, 101, int(step * 100))] for _ in range(len(choices))]
 
         # create folder for storing models and getting its path
-        path = createFolder(self.PATH)
+        path = create_folder(self.PATH)
 
         print("Creating humans ...")
 
-        humanNumber = 1
+        human_number = 1
         for combination in itertools.product(*[value for value in values]):
-            self.writeHuman(list(zip([choice for choice in self.choices], combination)), humanNumber, path)
-            humanNumber += 1
+            self.__write_human(list(zip([choice for choice in choices], combination)), human_number, path)
+            human_number += 1
 
         print("Finish creation")
 
-    def writeHuman(self, human, humanNumber, path):
-        fileName = "human " + str(humanNumber) + ".mhm"
+    def __write_human(self, human, human_number, path):
+        file_name = "human " + str(human_number) + ".mhm"
 
         pattern = r"\n\s+"
 
-        f = open(path + "/" + fileName, "x")
+        f = open(path + "/" + file_name, "x")
 
-        name = "name human" + str(humanNumber)
-        tmpStr = self.VERSION + "\n" + name + "\n" + self.CAMERA + "\n" + re.sub(pattern, "\n", self.STANDARD_PARAMETERS) + "\n"
+        name = "name human" + str(human_number)
+        tmp_str = self.VERSION + "\n" + name + "\n" + self.CAMERA + "\n" + re.sub(pattern, "\n",
+                                                                                  self.STANDARD_PARAMETERS) + "\n"
 
         for param in human:
-            tmpStr += "modifier " + param[0] + " " + str(param[1]) + "\n"
+            tmp_str += "modifier " + param[0] + " " + str(param[1]) + "\n"
 
-        tmpStr += re.sub(pattern, "\n", self.SUFFIX)
+        tmp_str += re.sub(pattern, "\n", self.SUFFIX)
 
-        f.write(tmpStr)
+        f.write(tmp_str)
 
         f.close()
-
-if __name__ == "__main__":
-    h = HumanGenerator()
-    h.start()
-    # h.debugChoice()
