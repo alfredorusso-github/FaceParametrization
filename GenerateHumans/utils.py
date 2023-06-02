@@ -31,8 +31,8 @@ def compute_size(params, number_of_values):
         estimated_size /= 1024
 
         if suffix == 'YB' and estimated_size > 1024:
-            return "For the choices you made there are {0} combinations with an estimated size of {1:.2f} {2}".format(
-                number_combinations, estimated_size, suffix)
+            return "For the choices you made there are {0} combinations with an estimated size of {1:.2f} {2}.".format(
+                int(number_combinations), estimated_size, suffix)
         elif estimated_size < 1024:
-            return "For the choices you made there are {0} combinations with an estimated size of {1:.2f} {2}".format(
-                number_combinations, estimated_size, suffix)
+            return "For the choices you made there are {0} combinations with an estimated size of {1:.2f} {2}.".format(
+                int(number_combinations), estimated_size, suffix)

@@ -100,7 +100,7 @@ class ButtonsFrame(ctk.CTkFrame):
 
         size_string = utils.compute_size(self.choices, num_values)
 
-        size_dialog = SizeDialog(size_string)
+        size_dialog = SizeDialog(size_string + "\n\nDo you want to continue?")
 
         h.create_human(self.choices, step) if size_dialog.get_user_input() else None
 
@@ -114,6 +114,7 @@ class SizeDialog(ctk.CTkToplevel):
         super().__init__()
         self.geometry("350x200")
         self.resizable(False, False)
+        super().title('~')
 
         self.message = msg
         self._create_widgets()
